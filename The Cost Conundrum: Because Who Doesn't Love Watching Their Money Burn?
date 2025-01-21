@@ -1,0 +1,68 @@
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+
+# Generate synthetic data
+np.random.seed(42)
+output_levels = np.linspace(1, 100, 100)
+fixed_costs = np.full_like(output_levels, 500)  # Fixed cost remains constant, like your rent nightmares
+variable_costs = 20 * output_levels + np.random.normal(0, 10, 100)  # VC increases with output, just like your existential dread
+
+# Compute total cost, marginal cost, and average cost
+total_costs = fixed_costs + variable_costs
+marginal_costs = np.gradient(total_costs)
+average_costs = total_costs / output_levels
+
+# Create DataFrame
+data = pd.DataFrame({
+    'Output': output_levels,
+    'FixedCost': fixed_costs,
+    'VariableCost': variable_costs,
+    'TotalCost': total_costs,
+    'MarginalCost': marginal_costs,
+    'AverageCost': average_costs
+})
+
+# Define features and target variable for prediction
+X = data[['Output']]
+y_total_cost = data['TotalCost']
+y_marginal_cost = data['MarginalCost']
+y_average_cost = data['AverageCost']
+
+# Train linear regression models for cost predictions
+model_total_cost = LinearRegression()
+model_marginal_cost = LinearRegression()
+model_average_cost = LinearRegression()
+model_total_cost.fit(X, y_total_cost)
+model_marginal_cost.fit(X, y_marginal_cost)
+model_average_cost.fit(X, y_average_cost)
+
+# Predict future costs for new output levels
+future_output_levels = np.linspace(100, 200, 50).reshape(-1, 1)
+predicted_total_cost = model_total_cost.predict(future_output_levels)
+predicted_marginal_cost = model_marginal_cost.predict(future_output_levels)
+predicted_average_cost = model_average_cost.predict(future_output_levels)
+
+# Plotting results
+plt.figure(figsize=(12, 6))
+plt.plot(output_levels, total_costs, 'b-', label='Actual Total Cost')
+plt.plot(future_output_levels, predicted_total_cost, 'b--', label='Predicted Total Cost')
+plt.plot(output_levels, marginal_costs, 'r-', label='Actual Marginal Cost')
+plt.plot(future_output_levels, predicted_marginal_cost, 'r--', label='Predicted Marginal Cost')
+plt.plot(output_levels, average_costs, 'g-', label='Actual Average Cost')
+plt.plot(future_output_levels, predicted_average_cost, 'g--', label='Predicted Average Cost')
+plt.xlabel('Output Level')
+plt.ylabel('Cost')
+plt.title('The Cost Conundrum: Watching Your Money Burn')
+plt.legend()
+plt.show()
+
+print("Predicted Total Costs for Future Output Levels:")
+print(predicted_total_cost)
+
+print("Predicted Marginal Costs for Future Output Levels:")
+print(predicted_marginal_cost)
+
+print("Predicted Average Costs for Future Output Levels:")
+print(predicted_average_cost)
